@@ -14,7 +14,7 @@ class CartFooterSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<CartCubit, CartState>(
       builder: (context, state) {
-        if (state is CartSuccess && state.items.isNotEmpty) {
+        if (state.status == CartStatus.success && state.cartItems.isNotEmpty) {
           return Container(
             padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
             decoration: BoxDecoration(

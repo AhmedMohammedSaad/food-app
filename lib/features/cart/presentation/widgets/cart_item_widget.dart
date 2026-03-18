@@ -28,7 +28,7 @@ class CartItemWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -69,16 +69,24 @@ class CartItemWidget extends StatelessWidget {
                     ),
                   ],
                 ),
-                Text(
-                  item.food.restaurantName,
-                  style: AppTextStyle.font14RegularSlate600,
-                ),
-                SizedBox(height: 8.h),
+                if (item.selectedSize != null)
+                  Text(
+                    'Size: ${item.selectedSize!.name}',
+                    style: AppTextStyle.font12RegularSlate500,
+                  ),
+                if (item.selectedAddOns.isNotEmpty)
+                  Text(
+                    'Add-ons: ${item.selectedAddOns.map((e) => e.name).join(', ')}',
+                    style: AppTextStyle.font12RegularSlate500,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                SizedBox(height: 4.h),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '\$${item.food.price.toStringAsFixed(2)}',
+                      '\$${item.totalPrice.toStringAsFixed(2)}',
                       style: AppTextStyle.font14BoldPrimary,
                     ),
                     Container(

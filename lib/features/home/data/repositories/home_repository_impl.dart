@@ -20,9 +20,9 @@ class HomeRepositoryImpl implements HomeRepository {
   }
 
   @override
-  Future<Either<Failure, List<RestaurantModel>>> getRestaurants() async {
+  Future<Either<Failure, List<RestaurantModel>>> getRestaurants({int limit = 10, int offset = 0}) async {
     try {
-      final restaurants = await remoteDataSource.getRestaurants();
+      final restaurants = await remoteDataSource.getRestaurants(limit: limit, offset: offset);
       return Right(restaurants);
     } catch (e) {
       return Left(ServerFailure(e.toString()));
@@ -30,9 +30,9 @@ class HomeRepositoryImpl implements HomeRepository {
   }
 
   @override
-  Future<Either<Failure, List<FoodModel>>> getRecommendedFoods() async {
+  Future<Either<Failure, List<FoodModel>>> getRecommendedFoods({int limit = 10, int offset = 0}) async {
     try {
-      final foods = await remoteDataSource.getRecommendedFoods();
+      final foods = await remoteDataSource.getRecommendedFoods(limit: limit, offset: offset);
       return Right(foods);
     } catch (e) {
       return Left(ServerFailure(e.toString()));

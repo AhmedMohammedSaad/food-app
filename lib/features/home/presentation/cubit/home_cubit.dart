@@ -1,5 +1,7 @@
+import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/errors/failure.dart';
 import '../../domain/repositories/home_repository.dart';
 import '../../data/models/home_models.dart';
 import 'home_state.dart';
@@ -12,18 +14,24 @@ class HomeCubit extends Cubit<HomeState> {
   List<RestaurantModel> _allRestaurants = [];
   List<FoodModel> _allRecommendedFoods = [];
 
+  int _restaurantOffset = 0;
+  int _foodOffset = 0;
+  final int _limit = 10;
+
   void getHomeData() async {
     emit(HomeLoading());
+    _restaurantOffset = 0;
+    _foodOffset = 0;
 
     final results = await Future.wait([
       homeRepository.getCategories(),
-      homeRepository.getRestaurants(),
-      homeRepository.getRecommendedFoods(),
+      homeRepository.getRestaurants(limit: _limit, offset: _restaurantOffset),
+      homeRepository.getRecommendedFoods(limit: _limit, offset: _foodOffset),
     ]);
 
-    final categoriesResult = results[0] as dynamic; // Either<Failure, List<CategoryModel>>
-    final restaurantsResult = results[1] as dynamic; // Either<Failure, List<RestaurantModel>>
-    final foodsResult = results[2] as dynamic; // Either<Failure, List<FoodModel>>
+    final categoriesResult = results[0] as Either<Failure, List<CategoryModel>>;
+    final restaurantsResult = results[1] as Either<Failure, List<RestaurantModel>>;
+    final foodsResult = results[2] as Either<Failure, List<FoodModel>>;
 
     bool hasError = false;
     String errorMessage = '';
@@ -42,7 +50,10 @@ class HomeCubit extends Cubit<HomeState> {
           hasError = true;
           errorMessage = failure.message;
         },
-        (restaurants) => _allRestaurants = restaurants,
+        (restaurants) {
+          _allRestaurants = List.from(restaurants);
+          _restaurantOffset += restaurants.length;
+        },
       );
     }
 
@@ -52,7 +63,10 @@ class HomeCubit extends Cubit<HomeState> {
           hasError = true;
           errorMessage = failure.message;
         },
-        (foods) => _allRecommendedFoods = foods,
+        (foods) {
+          _allRecommendedFoods = List.from(foods);
+          _foodOffset += foods.length;
+        },
       );
     }
 
@@ -63,7 +77,65 @@ class HomeCubit extends Cubit<HomeState> {
         categories: _allCategories,
         restaurants: _allRestaurants,
         recommendedFoods: _allRecommendedFoods,
+        hasMoreRestaurants: _allRestaurants.length >= _limit,
+        hasMoreFoods: _allRecommendedFoods.length >= _limit,
       ));
+    }
+  }
+
+  void loadMoreRestaurants() async {
+    if (state is HomeSuccess) {
+      final currentState = state as HomeSuccess;
+      if (currentState.isMoreRestaurantsLoading || !currentState.hasMoreRestaurants) return;
+
+      emit(currentState.copyWith(isMoreRestaurantsLoading: true));
+
+      final result = await homeRepository.getRestaurants(limit: _limit, offset: _restaurantOffset);
+
+      result.fold(
+        (failure) => emit(currentState.copyWith(isMoreRestaurantsLoading: false)),
+        (newRestaurants) {
+          if (newRestaurants.isEmpty) {
+            emit(currentState.copyWith(isMoreRestaurantsLoading: false, hasMoreRestaurants: false));
+          } else {
+            _allRestaurants.addAll(newRestaurants);
+            _restaurantOffset += newRestaurants.length;
+            emit(currentState.copyWith(
+              restaurants: List.from(_allRestaurants),
+              isMoreRestaurantsLoading: false,
+              hasMoreRestaurants: newRestaurants.length >= _limit,
+            ));
+          }
+        },
+      );
+    }
+  }
+
+  void loadMoreRecommendedFoods() async {
+    if (state is HomeSuccess) {
+      final currentState = state as HomeSuccess;
+      if (currentState.isMoreFoodsLoading || !currentState.hasMoreFoods) return;
+
+      emit(currentState.copyWith(isMoreFoodsLoading: true));
+
+      final result = await homeRepository.getRecommendedFoods(limit: _limit, offset: _foodOffset);
+
+      result.fold(
+        (failure) => emit(currentState.copyWith(isMoreFoodsLoading: false)),
+        (newFoods) {
+          if (newFoods.isEmpty) {
+            emit(currentState.copyWith(isMoreFoodsLoading: false, hasMoreFoods: false));
+          } else {
+            _allRecommendedFoods.addAll(newFoods);
+            _foodOffset += newFoods.length;
+            emit(currentState.copyWith(
+              recommendedFoods: List.from(_allRecommendedFoods),
+              isMoreFoodsLoading: false,
+              hasMoreFoods: newFoods.length >= _limit,
+            ));
+          }
+        },
+      );
     }
   }
 

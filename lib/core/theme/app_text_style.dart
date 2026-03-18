@@ -171,4 +171,10 @@ class AppTextStyle {
     fontWeight: FontWeight.w400,
     color: AppColors.slate500,
   );
+
+  static TextStyle font12RegularSlate500 = GoogleFonts.inter(
+    fontSize: 12.sp,
+    fontWeight: FontWeight.w400,
+    color: AppColors.slate500,
+  );
 }

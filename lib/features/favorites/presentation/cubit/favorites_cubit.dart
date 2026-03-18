@@ -48,7 +48,9 @@ class FavoritesCubit extends Cubit<FavoritesState> {
             imageUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800',
             price: 14.99,
             description: '',
+            restaurantId: '1',
             restaurantName: "Luigi's Pizzeria",
+            menuCategory: 'Main Dishes',
           ),
           const FoodModel(
             id: '2',
@@ -56,7 +58,9 @@ class FavoritesCubit extends Cubit<FavoritesState> {
             imageUrl: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=800',
             price: 8.99,
             description: '',
+            restaurantId: '2',
             restaurantName: 'Green Garden',
+            menuCategory: 'Main Dishes',
           ),
         ],
         favoriteRestaurants: [

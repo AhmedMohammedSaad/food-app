@@ -13,7 +13,7 @@ class CartOrderSummarySection extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<CartCubit, CartState>(
       builder: (context, state) {
-        if (state is CartSuccess && state.items.isNotEmpty) {
+        if (state.status == CartStatus.success && state.cartItems.isNotEmpty) {
           return Container(
             margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
             padding: EdgeInsets.all(20.r),

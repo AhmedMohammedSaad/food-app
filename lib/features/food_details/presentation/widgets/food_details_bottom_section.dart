@@ -88,10 +88,30 @@ class AddToCartButtonWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: BlocBuilder<FoodDetailsCubit, FoodDetailsState>(
+      child: BlocConsumer<FoodDetailsCubit, FoodDetailsState>(
+        listener: (context, state) {
+          if (state.isAddedSuccessfully) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Added to cart!'),
+                backgroundColor: Colors.green,
+              ),
+            );
+            Navigator.pop(context);
+          } else if (state.error != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.error!),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        },
         builder: (context, state) {
           return ElevatedButton(
-            onPressed: () {},
+            onPressed: state.isAddingToCart
+                ? null
+                : () => context.read<FoodDetailsCubit>().addToCart(),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               padding: EdgeInsets.symmetric(vertical: 16.h),
@@ -101,12 +121,21 @@ class AddToCartButtonWidget extends StatelessWidget {
               elevation: 4,
               shadowColor: AppColors.primary.withValues(alpha: 0.3),
             ),
-            child: Text(
-              'Add to Cart - \$${state.totalPrice.toStringAsFixed(2)}',
-              style: AppTextStyle.font16BoldCharcoal.copyWith(
-                color: Colors.white,
-              ),
-            ),
+            child: state.isAddingToCart
+                ? SizedBox(
+                    height: 20.h,
+                    width: 20.h,
+                    child: const CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : Text(
+                    'Add to Cart - \$${state.totalPrice.toStringAsFixed(2)}',
+                    style: AppTextStyle.font16BoldCharcoal.copyWith(
+                      color: Colors.white,
+                    ),
+                  ),
           );
         },
       ),

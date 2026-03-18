@@ -115,7 +115,9 @@ class FoodModel {
   final String imageUrl;
   final double price;
   final String description;
+  final String restaurantId;
   final String restaurantName;
+  final String menuCategory;
   final double rating;
   final List<IngredientModel> ingredients;
   final List<SizeModel> sizes;
@@ -127,7 +129,9 @@ class FoodModel {
     required this.imageUrl,
     required this.price,
     required this.description,
+    required this.restaurantId,
     required this.restaurantName,
+    required this.menuCategory,
     this.rating = 4.5,
     this.ingredients = const [],
     this.sizes = const [],
@@ -141,7 +145,9 @@ class FoodModel {
       imageUrl: json['image_url'] ?? '',
       price: (json['base_price'] as num?)?.toDouble() ?? 0.0,
       description: json['description'] ?? '',
+      restaurantId: json['restaurant_id'] as String? ?? '',
       restaurantName: json['restaurants']?['name'] ?? '',
+      menuCategory: json['menu_category'] ?? 'Main Dishes',
       rating: (json['rating'] as num?)?.toDouble() ?? 4.5,
       ingredients: (json['food_ingredients'] as List?)
               ?.map((e) => IngredientModel.fromJson(e as Map<String, dynamic>))

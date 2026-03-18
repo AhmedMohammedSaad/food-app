@@ -1,39 +1,53 @@
+import 'package:equatable/equatable.dart';
 import '../../data/models/cart_item_model.dart';
 
-abstract class CartState {}
+enum CartStatus { initial, loading, success, error }
 
-class CartInitial extends CartState {}
-
-class CartLoading extends CartState {}
-
-class CartSuccess extends CartState {
-  final List<CartItemModel> items;
+class CartState extends Equatable {
+  final List<CartItemModel> cartItems;
+  final double totalPrice;
+  final CartStatus status;
+  final String? errorMessage;
   final double deliveryFee;
   final double tax;
 
-  CartSuccess({
-    required this.items,
+  const CartState({
+    required this.cartItems,
+    required this.totalPrice,
+    this.status = CartStatus.initial,
+    this.errorMessage,
     this.deliveryFee = 2.99,
     this.tax = 1.50,
   });
 
-  double get subtotal => items.fold(0, (sum, item) => sum + item.totalPrice);
+  double get subtotal => cartItems.fold(0, (sum, item) => sum + item.totalPrice);
   double get total => subtotal + deliveryFee + tax;
 
-  CartSuccess copyWith({
-    List<CartItemModel>? items,
+  CartState copyWith({
+    List<CartItemModel>? cartItems,
+    double? totalPrice,
+    CartStatus? status,
+    String? errorMessage,
     double? deliveryFee,
     double? tax,
   }) {
-    return CartSuccess(
-      items: items ?? this.items,
+    return CartState(
+      cartItems: cartItems ?? this.cartItems,
+      totalPrice: totalPrice ?? this.totalPrice,
+      status: status ?? this.status,
+      errorMessage: errorMessage ?? this.errorMessage,
       deliveryFee: deliveryFee ?? this.deliveryFee,
       tax: tax ?? this.tax,
     );
   }
-}
 
-class CartError extends CartState {
-  final String message;
-  CartError(this.message);
+  @override
+  List<Object?> get props => [
+        cartItems,
+        totalPrice,
+        status,
+        errorMessage,
+        deliveryFee,
+        tax,
+      ];
 }

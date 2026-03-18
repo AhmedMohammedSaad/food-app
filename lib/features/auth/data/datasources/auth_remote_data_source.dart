@@ -104,7 +104,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   UserModel? getCurrentUser() {
     final session = supabaseClient.auth.currentSession;
-    if (session != null && session.user != null) {
+    if (session != null) {
       return UserModel(
         id: session.user.id,
         email: session.user.email!,

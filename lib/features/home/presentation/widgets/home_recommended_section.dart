@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_text_style.dart';
 import '../../data/models/home_models.dart';
+import '../cubit/home_cubit.dart';
+import '../cubit/home_state.dart';
 import 'food_item.dart';
 
 class HomeRecommendedSection extends StatelessWidget {
@@ -38,11 +41,25 @@ class HomeRecommendedSection extends StatelessWidget {
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           padding: EdgeInsets.symmetric(horizontal: 16.w),
-          itemCount: foods.length,
-          itemBuilder: (context, index) => FoodItem(food: foods[index]),
+          itemCount: foods.length + 1,
+          itemBuilder: (context, index) {
+            if (index == foods.length) {
+              return BlocBuilder<HomeCubit, HomeState>(
+                builder: (context, state) {
+                  if (state is HomeSuccess && state.isMoreFoodsLoading) {
+                    return Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16.h),
+                      child: const Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              );
+            }
+            return FoodItem(food: foods[index]);
+          },
         ),
       ],
     );
   }
-
 }

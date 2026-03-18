@@ -15,6 +15,10 @@ class HomeSuccess extends HomeState {
   final String searchQuery;
   final String? sortBy;
   final RangeValues? priceRange;
+  final bool isMoreRestaurantsLoading;
+  final bool isMoreFoodsLoading;
+  final bool hasMoreRestaurants;
+  final bool hasMoreFoods;
 
   HomeSuccess({
     required this.categories,
@@ -24,6 +28,10 @@ class HomeSuccess extends HomeState {
     this.searchQuery = '',
     this.sortBy,
     this.priceRange,
+    this.isMoreRestaurantsLoading = false,
+    this.isMoreFoodsLoading = false,
+    this.hasMoreRestaurants = true,
+    this.hasMoreFoods = true,
   });
 
   HomeSuccess copyWith({
@@ -35,6 +43,10 @@ class HomeSuccess extends HomeState {
     String? searchQuery,
     String? sortBy,
     RangeValues? priceRange,
+    bool? isMoreRestaurantsLoading,
+    bool? isMoreFoodsLoading,
+    bool? hasMoreRestaurants,
+    bool? hasMoreFoods,
   }) {
     return HomeSuccess(
       categories: categories ?? this.categories,
@@ -45,6 +57,10 @@ class HomeSuccess extends HomeState {
       searchQuery: searchQuery ?? this.searchQuery,
       sortBy: sortBy ?? this.sortBy,
       priceRange: priceRange ?? this.priceRange,
+      isMoreRestaurantsLoading: isMoreRestaurantsLoading ?? this.isMoreRestaurantsLoading,
+      isMoreFoodsLoading: isMoreFoodsLoading ?? this.isMoreFoodsLoading,
+      hasMoreRestaurants: hasMoreRestaurants ?? this.hasMoreRestaurants,
+      hasMoreFoods: hasMoreFoods ?? this.hasMoreFoods,
     );
   }
 }

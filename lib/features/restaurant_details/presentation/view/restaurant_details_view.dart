@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/di/dependency_injection.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../home/data/models/home_models.dart';
 import '../cubit/restaurant_details_cubit.dart';
@@ -15,7 +16,7 @@ class RestaurantDetailsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => RestaurantDetailsCubit()..loadMenu(restaurant.id),
+      create: (context) => getIt<RestaurantDetailsCubit>()..loadMenu(restaurant.id),
       child: Scaffold(
         backgroundColor: AppColors.backgroundLight,
         body: CustomScrollView(

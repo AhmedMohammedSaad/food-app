@@ -11,7 +11,7 @@ class RestaurantMenuSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final categories = ['Popular', 'Meals', 'Drinks', 'Desserts', 'Sides'];
+    final categories = ['Popular', 'Main Dishes', 'Drinks', 'Sides'];
     return MultiSliver(
       children: [
         SliverPersistentHeader(
@@ -20,12 +20,13 @@ class RestaurantMenuSection extends StatelessWidget {
         ),
         BlocBuilder<RestaurantDetailsCubit, RestaurantDetailsState>(
           builder: (context, state) {
+            final menuItems = context.read<RestaurantDetailsCubit>().filteredMenuItems;
             return SliverPadding(
               padding: EdgeInsets.symmetric(horizontal: 16.w),
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate((context, index) {
-                  return MenuItemWidget(food: state.menuItems[index]);
-                }, childCount: state.menuItems.length),
+                  return MenuItemWidget(food: menuItems[index]);
+                }, childCount: menuItems.length),
               ),
             );
           },

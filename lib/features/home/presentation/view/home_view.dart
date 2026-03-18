@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:test_food_app/features/home/presentation/widgets/home_recommended_section.dart';
 import '../../../../core/di/dependency_injection.dart';
 import '../../../../core/router/routes.dart';
 import '../cubit/home_cubit.dart';
@@ -11,11 +12,35 @@ import '../widgets/home_header_section.dart';
 import '../widgets/home_loading_skeleton.dart';
 import '../widgets/home_popular_restaurants_section.dart';
 import '../widgets/home_promo_banner_section.dart';
-import '../widgets/home_recommended_section.dart';
 import '../widgets/home_search_bar_section.dart';
 
-class HomeView extends StatelessWidget {
+class HomeView extends StatefulWidget {
   const HomeView({super.key});
+
+  @override
+  State<HomeView> createState() => _HomeViewState();
+}
+
+class _HomeViewState extends State<HomeView> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      context.read<HomeCubit>().loadMoreRecommendedFoods();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +57,7 @@ class HomeView extends StatelessWidget {
                   context.read<HomeCubit>().getHomeData();
                 },
                 child: SingleChildScrollView(
+                  controller: _scrollController,
                   physics: const AlwaysScrollableScrollPhysics(),
                   child: Column(
                     children: [
