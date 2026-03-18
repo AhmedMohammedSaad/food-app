@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_style.dart';
 import '../../../../core/presentation/view/widgets/app_default_button.dart';
-import '../cubit/home_cubit.dart';
-import '../cubit/home_state.dart';
 
 class HomeFilterBottomSheet extends StatefulWidget {
-  const HomeFilterBottomSheet({super.key});
+  final String initialSortBy;
+  final RangeValues initialPriceRange;
+  final Function(String sortBy, RangeValues priceRange) onApply;
+
+  const HomeFilterBottomSheet({
+    super.key,
+    required this.initialSortBy,
+    required this.initialPriceRange,
+    required this.onApply,
+  });
 
   @override
   State<HomeFilterBottomSheet> createState() => _HomeFilterBottomSheetState();
@@ -28,11 +34,8 @@ class _HomeFilterBottomSheetState extends State<HomeFilterBottomSheet> {
   @override
   void initState() {
     super.initState();
-    final state = context.read<HomeCubit>().state;
-    if (state is HomeSuccess) {
-      _selectedSort = state.sortBy ?? "Popular";
-      _priceRange = state.priceRange ?? const RangeValues(0, 100);
-    }
+    _selectedSort = widget.initialSortBy;
+    _priceRange = widget.initialPriceRange;
   }
 
   @override
@@ -103,10 +106,7 @@ class _HomeFilterBottomSheetState extends State<HomeFilterBottomSheet> {
           AppDefaultButton(
             text: "Apply Filter",
             onPressed: () {
-              context.read<HomeCubit>().applyAdvancedFilters(
-                    sortBy: _selectedSort,
-                    priceRange: _priceRange,
-                  );
+              widget.onApply(_selectedSort, _priceRange);
               Navigator.pop(context);
             },
           ),

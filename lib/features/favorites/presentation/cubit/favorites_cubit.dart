@@ -1,6 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../home/data/models/home_models.dart';
 
+import '../../domain/repositories/favorites_repository.dart';
+
 abstract class FavoritesState {}
 
 class FavoritesInitial extends FavoritesState {}
@@ -33,83 +35,57 @@ class FavoritesFailure extends FavoritesState {
 }
 
 class FavoritesCubit extends Cubit<FavoritesState> {
-  FavoritesCubit() : super(FavoritesInitial());
+  final FavoritesRepository repository;
 
-  void getFavorites() async {
+  FavoritesCubit(this.repository) : super(FavoritesInitial());
+
+  Future<void> getFavorites() async {
     emit(FavoritesLoading());
-    try {
-      // Mocking data for now
-      await Future.delayed(const Duration(milliseconds: 500));
-      emit(FavoritesSuccess(
-        favoriteFoods: [
-          const FoodModel(
-            id: '1',
-            name: 'Margherita Pizza',
-            imageUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800',
-            price: 14.99,
-            description: '',
-            restaurantId: '1',
-            restaurantName: "Luigi's Pizzeria",
-            menuCategory: 'Main Dishes',
-          ),
-          const FoodModel(
-            id: '2',
-            name: 'Caesar Salad',
-            imageUrl: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=800',
-            price: 8.99,
-            description: '',
-            restaurantId: '2',
-            restaurantName: 'Green Garden',
-            menuCategory: 'Main Dishes',
-          ),
-        ],
-        favoriteRestaurants: [
-          const RestaurantModel(
-            id: '1',
-            name: 'Pizza Hut',
-            imageUrl: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=800',
-            rating: 4.5,
-            deliveryTime: '25-35 min',
-            distance: '1.2 km',
-            tags: ['Pizza', 'Fast Food'],
-            hasFreeDelivery: true,
-          ),
-        ],
-      ));
-    } catch (e) {
-      emit(FavoritesFailure("Failed to load favorites"));
+    
+    final foodsResult = await repository.getFavoriteFoods();
+    final restaurantsResult = await repository.getFavoriteRestaurants();
+
+    foodsResult.fold(
+      (failure) => emit(FavoritesFailure(failure.message)),
+      (foods) {
+        restaurantsResult.fold(
+          (failure) => emit(FavoritesFailure(failure.message)),
+          (restaurants) => emit(FavoritesSuccess(
+            favoriteFoods: foods,
+            favoriteRestaurants: restaurants,
+          )),
+        );
+      },
+    );
+  }
+
+  Future<void> removeFoodFromFavorites(String foodId) async {
+    if (state is FavoritesSuccess) {
+      final currentState = state as FavoritesSuccess;
+      final result = await repository.removeFoodFromFavorites(foodId);
+      
+      result.fold(
+        (failure) => null, // Handle error if needed
+        (_) {
+          final updatedFoods = currentState.favoriteFoods.where((f) => f.id != foodId).toList();
+          emit(currentState.copyWith(favoriteFoods: updatedFoods));
+        },
+      );
     }
   }
 
-  void toggleFavoriteFood(FoodModel food) {
+  Future<void> removeRestaurantFromFavorites(String restaurantId) async {
     if (state is FavoritesSuccess) {
       final currentState = state as FavoritesSuccess;
-      final isFavorite = currentState.favoriteFoods.any((f) => f.id == food.id);
+      final result = await repository.removeRestaurantFromFavorites(restaurantId);
       
-      List<FoodModel> updatedFoods;
-      if (isFavorite) {
-        updatedFoods = currentState.favoriteFoods.where((f) => f.id != food.id).toList();
-      } else {
-        updatedFoods = List.from(currentState.favoriteFoods)..add(food);
-      }
-      
-      emit(currentState.copyWith(favoriteFoods: updatedFoods));
-    }
-  }
-
-  void toggleFavoriteRestaurant(RestaurantModel restaurant) {
-    if (state is FavoritesSuccess) {
-      final currentState = state as FavoritesSuccess;
-      final isFavorite = currentState.favoriteRestaurants.any((r) => r.id == restaurant.id);
-      
-      List<RestaurantModel> updatedRestaurants;
-      if (isFavorite) {
-        updatedRestaurants = currentState.favoriteRestaurants.where((r) => r.id != restaurant.id).toList();
-      } else {
-        updatedRestaurants = List.from(currentState.favoriteRestaurants)..add(restaurant);
-      }
-      
-      emit(currentState.copyWith(favoriteRestaurants: updatedRestaurants));
+      result.fold(
+        (failure) => null, // Handle error if needed
+        (_) {
+          final updatedRestaurants = currentState.favoriteRestaurants.where((r) => r.id != restaurantId).toList();
+          emit(currentState.copyWith(favoriteRestaurants: updatedRestaurants));
+        },
+      );
     }
   }
 }

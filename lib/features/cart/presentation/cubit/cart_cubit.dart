@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../home/data/models/home_models.dart';
+import '../../data/models/cart_item_model.dart';
 import '../../domain/repositories/cart_repository.dart';
 import 'cart_state.dart';
 
@@ -63,19 +64,40 @@ class CartCubit extends Cubit<CartState> {
     );
   }
 
-  Future<void> updateQuantity(String cartItemId, int quantity) async {
-    final result = await cartRepository.updateQuantity(cartItemId, quantity);
-    if (result.isLeft()) {
-      emit(state.copyWith(
-        status: CartStatus.error,
-        errorMessage: 'Failed to update quantity',
-      ));
+  Future<void> updateQuantity(String cartItemId, int change) async {
+    final itemIndex = state.cartItems.indexWhere((item) => item.id == cartItemId);
+    if (itemIndex != -1) {
+      final currentQuantity = state.cartItems[itemIndex].quantity;
+      final newQuantity = currentQuantity + change;
+      
+      if (newQuantity < 1) return;
+
+      // Optimistic update
+      final newItems = List<CartItemModel>.from(state.cartItems);
+      newItems[itemIndex] = newItems[itemIndex].copyWith(quantity: newQuantity);
+      emit(state.copyWith(cartItems: newItems));
+      _calculateTotalPrice();
+
+      final result = await cartRepository.updateQuantity(cartItemId, newQuantity);
+      if (result.isLeft()) {
+        loadCart(); // Revert on failure
+        emit(state.copyWith(
+          status: CartStatus.error,
+          errorMessage: 'Failed to update quantity',
+        ));
+      }
     }
   }
 
   Future<void> removeItem(String cartItemId) async {
+    // Optimistic update
+    final newItems = state.cartItems.where((item) => item.id != cartItemId).toList();
+    emit(state.copyWith(cartItems: newItems));
+    _calculateTotalPrice();
+
     final result = await cartRepository.removeItem(cartItemId);
     if (result.isLeft()) {
+      loadCart(); // Revert on failure
       emit(state.copyWith(
         status: CartStatus.error,
         errorMessage: 'Failed to remove item',
@@ -84,8 +106,13 @@ class CartCubit extends Cubit<CartState> {
   }
 
   Future<void> clearCart() async {
+    // Optimistic update
+    emit(state.copyWith(cartItems: []));
+    _calculateTotalPrice();
+
     final result = await cartRepository.clearCart();
     if (result.isLeft()) {
+      loadCart(); // Revert on failure
       emit(state.copyWith(
         status: CartStatus.error,
         errorMessage: 'Failed to clear cart',

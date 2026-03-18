@@ -8,6 +8,7 @@ import '../../../home/presentation/widgets/home_search_bar_section.dart';
 import '../cubit/search_cubit.dart';
 import '../cubit/search_state.dart';
 import '../widgets/search_empty_state_widget.dart';
+import '../widgets/search_loading_skeleton.dart';
 import '../widgets/search_results_section.dart';
 
 class SearchView extends StatelessWidget {
@@ -39,7 +40,22 @@ class SearchView extends StatelessWidget {
                       context: context,
                       isScrollControlled: true,
                       backgroundColor: Colors.transparent,
-                      builder: (context) => const HomeFilterBottomSheet(),
+                      builder: (_) {
+                        final searchState = context.read<SearchCubit>().state;
+                        String initialSortBy = "Popular";
+                        RangeValues initialPriceRange = const RangeValues(0, 100);
+                        if (searchState is SearchSuccess) {
+                          initialSortBy = searchState.sortBy ?? "Popular";
+                          initialPriceRange = searchState.priceRange ?? const RangeValues(0, 100);
+                        }
+                        return HomeFilterBottomSheet(
+                          initialSortBy: initialSortBy,
+                          initialPriceRange: initialPriceRange,
+                          onApply: (sortBy, priceRange) {
+                            context.read<SearchCubit>().applyFilters(sortBy, priceRange);
+                          },
+                        );
+                      },
                     );
                   },
                 );
@@ -54,7 +70,7 @@ class SearchView extends StatelessWidget {
                       icon: Icons.search,
                     );
                   } else if (state is SearchLoading) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const SearchLoadingSkeleton();
                   } else if (state is SearchSuccess) {
                     if (state.restaurants.isEmpty && state.foods.isEmpty) {
                       return SearchEmptyStateWidget(

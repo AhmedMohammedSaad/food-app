@@ -7,6 +7,7 @@ import '../../../../core/theme/app_text_style.dart';
 import '../cubit/profile_cubit.dart';
 import '../cubit/profile_state.dart';
 import '../widgets/profile_header_section.dart';
+import '../widgets/profile_loading_skeleton.dart';
 import '../widgets/profile_options_section.dart';
 
 class ProfileView extends StatelessWidget {
@@ -31,7 +32,7 @@ class ProfileView extends StatelessWidget {
         body: BlocBuilder<ProfileCubit, ProfileState>(
           builder: (context, state) {
             if (state is ProfileLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return const ProfileLoadingSkeleton();
             } else if (state is ProfileSuccess) {
               return SingleChildScrollView(
                 child: Padding(

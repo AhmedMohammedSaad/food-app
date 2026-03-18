@@ -16,7 +16,7 @@ class TrackingStatusSection extends StatelessWidget {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -78,7 +78,7 @@ class TrackingStatusSection extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: isCompleted || isActive ? AppColors.primary : AppColors.slate200,
-                border: isActive ? Border.all(color: AppColors.primary.withOpacity(0.3), width: 4) : null,
+                border: isActive ? Border.all(color: AppColors.primary.withValues(alpha: 0.3), width: 4) : null,
               ),
               child: isCompleted
                   ? Icon(Icons.check, size: 12.r, color: Colors.white)

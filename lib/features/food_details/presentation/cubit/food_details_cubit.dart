@@ -3,12 +3,16 @@ import 'package:test_food_app/features/cart/domain/repositories/cart_repository.
 import 'package:test_food_app/features/home/data/models/home_models.dart';
 import 'food_details_state.dart';
 
+import '../../../../features/favorites/domain/repositories/favorites_repository.dart';
+
 class FoodDetailsCubit extends Cubit<FoodDetailsState> {
   final CartRepository cartRepository;
+  final FavoritesRepository favoritesRepository;
 
-  FoodDetailsCubit(this.cartRepository) : super(const FoodDetailsState());
+  FoodDetailsCubit(this.cartRepository, this.favoritesRepository)
+      : super(const FoodDetailsState());
 
-  void init(FoodModel food) {
+  Future<void> init(FoodModel food) async {
     emit(
       state.copyWith(
         food: food,
@@ -16,6 +20,29 @@ class FoodDetailsCubit extends Cubit<FoodDetailsState> {
         totalPrice: food.price,
         quantity: 1,
       ),
+    );
+
+    // Check if favorite
+    final result = await favoritesRepository.isFoodFavorite(food.id);
+    result.fold(
+      (_) => null,
+      (isFav) => emit(state.copyWith(isFavorite: isFav)),
+    );
+  }
+
+  Future<void> toggleFavorite() async {
+    if (state.food == null) return;
+
+    final newFavoriteStatus = !state.isFavorite;
+    emit(state.copyWith(isFavorite: newFavoriteStatus));
+
+    final result = newFavoriteStatus
+        ? await favoritesRepository.addFoodToFavorites(state.food!.id)
+        : await favoritesRepository.removeFoodFromFavorites(state.food!.id);
+
+    result.fold(
+      (failure) => emit(state.copyWith(isFavorite: !newFavoriteStatus)), // Revert on failure
+      (_) => null,
     );
   }
 

@@ -72,19 +72,38 @@ class OrderModel extends Equatable {
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
+    var rData = json['restaurants'] ?? json['restaurant'];
+    String? rName;
+    String? rImg;
+
+    if (rData != null) {
+      if (rData is Map) {
+        rName = rData['name']?.toString();
+        rImg = rData['image_url']?.toString();
+      } else if (rData is List && rData.isNotEmpty) {
+        final first = rData.first;
+        if (first is Map) {
+          rName = first['name']?.toString();
+          rImg = first['image_url']?.toString();
+        }
+      }
+    }
+
     return OrderModel(
-      id: json['id'],
-      userId: json['user_id'],
-      restaurantId: json['restaurant_id'],
-      addressId: json['address_id'],
-      status: OrderStatus.fromString(json['status']),
-      subtotal: (json['subtotal'] as num).toDouble(),
-      deliveryFee: (json['delivery_fee'] as num).toDouble(),
-      tax: (json['tax'] as num).toDouble(),
-      totalAmount: (json['total_amount'] as num).toDouble(),
-      restaurantName: json['restaurants']?['name'],
-      restaurantImageUrl: json['restaurants']?['image_url'],
-      createdAt: DateTime.parse(json['created_at']),
+      id: json['id']?.toString() ?? '',
+      userId: json['user_id']?.toString() ?? '',
+      restaurantId: json['restaurant_id']?.toString(),
+      addressId: json['address_id']?.toString(),
+      status: OrderStatus.fromString(json['status']?.toString() ?? ''),
+      subtotal: (json['subtotal'] as num?)?.toDouble() ?? 0.0,
+      deliveryFee: (json['delivery_fee'] as num?)?.toDouble() ?? 0.0,
+      tax: (json['tax'] as num?)?.toDouble() ?? 0.0,
+      totalAmount: (json['total_amount'] as num?)?.toDouble() ?? 0.0,
+      restaurantName: rName,
+      restaurantImageUrl: rImg,
+      createdAt:
+          DateTime.tryParse(json['created_at']?.toString() ?? '') ??
+          DateTime.now(),
       items: (json['order_items'] as List? ?? [])
           .map((i) => OrderItemModel.fromJson(i))
           .toList(),
@@ -93,19 +112,20 @@ class OrderModel extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        userId,
-        restaurantId,
-        addressId,
-        status,
-        subtotal,
-        deliveryFee,
-        tax,
-        totalAmount,
-        restaurantName,
-        createdAt,
-        items,
-      ];
+    id,
+    userId,
+    restaurantId,
+    addressId,
+    status,
+    subtotal,
+    deliveryFee,
+    tax,
+    totalAmount,
+    restaurantName,
+    restaurantImageUrl,
+    createdAt,
+    items,
+  ];
 }
 
 class OrderItemModel extends Equatable {
@@ -149,26 +169,23 @@ class OrderItemModel extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        orderId,
-        foodId,
-        foodName,
-        quantity,
-        sizeName,
-        unitPrice,
-        totalPrice,
-        addOns,
-      ];
+    id,
+    orderId,
+    foodId,
+    foodName,
+    quantity,
+    sizeName,
+    unitPrice,
+    totalPrice,
+    addOns,
+  ];
 }
 
 class OrderItemAddOnModel extends Equatable {
   final String addonName;
   final double price;
 
-  const OrderItemAddOnModel({
-    required this.addonName,
-    required this.price,
-  });
+  const OrderItemAddOnModel({required this.addonName, required this.price});
 
   factory OrderItemAddOnModel.fromJson(Map<String, dynamic> json) {
     return OrderItemAddOnModel(

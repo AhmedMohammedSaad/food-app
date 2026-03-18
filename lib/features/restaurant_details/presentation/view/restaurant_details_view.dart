@@ -16,7 +16,7 @@ class RestaurantDetailsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => getIt<RestaurantDetailsCubit>()..loadMenu(restaurant.id),
+      create: (context) => getIt<RestaurantDetailsCubit>()..loadRestaurantDetails(restaurant.id),
       child: Scaffold(
         backgroundColor: AppColors.backgroundLight,
         body: CustomScrollView(

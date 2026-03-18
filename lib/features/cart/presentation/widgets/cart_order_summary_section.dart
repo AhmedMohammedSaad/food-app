@@ -13,12 +13,12 @@ class CartOrderSummarySection extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<CartCubit, CartState>(
       builder: (context, state) {
-        if (state.status == CartStatus.success && state.cartItems.isNotEmpty) {
+        if (state.cartItems.isNotEmpty) {
           return Container(
             margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
             padding: EdgeInsets.all(20.r),
             decoration: BoxDecoration(
-              color: AppColors.slate100.withOpacity(0.3),
+              color: AppColors.slate100.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(16.r),
             ),
             child: Column(
@@ -30,7 +30,7 @@ class CartOrderSummarySection extends StatelessWidget {
                 _buildSummaryRow('Tax', '\$${state.tax.toStringAsFixed(2)}'),
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: 16.h),
-                  child: Divider(color: AppColors.slate400.withOpacity(0.2)),
+                  child: Divider(color: AppColors.slate400.withValues(alpha: 0.2)),
                 ),
                 _buildSummaryRow(
                   'Total',

@@ -8,6 +8,7 @@ import '../cubit/cart_cubit.dart';
 import '../cubit/cart_state.dart';
 import '../widgets/cart_footer_section.dart';
 import '../widgets/cart_list_section.dart';
+import '../widgets/cart_loading_skeleton.dart';
 import '../widgets/cart_order_summary_section.dart';
 
 class CartView extends StatelessWidget {
@@ -22,19 +23,20 @@ class CartView extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-            onPressed: () => Navigator.pop(context),
-          ),
+
           title: Text('My Cart', style: AppTextStyle.font18SemiBoldCharcoal),
           centerTitle: true,
         ),
         body: BlocBuilder<CartCubit, CartState>(
           builder: (context, state) {
             if (state.status == CartStatus.loading && state.cartItems.isEmpty) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (state.status == CartStatus.error &&
-                state.cartItems.isEmpty) {
+              return const Padding(
+                padding: EdgeInsets.all(20.0),
+                child: CartLoadingSkeleton(),
+              );
+            }
+
+            if (state.status == CartStatus.error && state.cartItems.isEmpty) {
               return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../home/data/models/home_models.dart';
+import '../cubit/food_details_cubit.dart';
+import '../cubit/food_details_state.dart';
 import 'circle_button_widget.dart';
 
 class FoodDetailsAppBarSection extends StatelessWidget {
@@ -31,7 +35,23 @@ class FoodDetailsAppBarSection extends StatelessWidget {
                     icon: Icons.arrow_back_ios_new,
                     onTap: () => Navigator.pop(context),
                   ),
-                  CircleButtonWidget(icon: Icons.share, onTap: () {}),
+                  Row(
+                    children: [
+                      BlocBuilder<FoodDetailsCubit, FoodDetailsState>(
+                        builder: (context, state) {
+                          return CircleButtonWidget(
+                            icon: state.isFavorite
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            iconColor: AppColors.primary,
+                            onTap: () => context
+                                .read<FoodDetailsCubit>()
+                                .toggleFavorite(),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),

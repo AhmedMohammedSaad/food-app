@@ -5,11 +5,13 @@ import '../../../../core/theme/app_colors.dart';
 class CircleButtonWidget extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
+  final Color? iconColor;
 
   const CircleButtonWidget({
     super.key,
     required this.icon,
     required this.onTap,
+    this.iconColor,
   });
 
   @override
@@ -30,7 +32,11 @@ class CircleButtonWidget extends StatelessWidget {
             ),
           ],
         ),
-        child: Icon(icon, color: AppColors.charcoal, size: 18.sp),
+        child: Icon(
+          icon,
+          color: iconColor ?? AppColors.charcoal,
+          size: 18.sp,
+        ),
       ),
     );
   }

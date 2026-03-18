@@ -24,6 +24,8 @@ import '../../features/home/data/repositories/home_repository_impl.dart';
 import '../../features/home/domain/repositories/home_repository.dart';
 
 import '../../features/restaurant_details/data/datasources/restaurant_details_remote_data_source.dart';
+import '../../features/restaurant_details/data/repositories/restaurant_details_repository_impl.dart';
+import '../../features/restaurant_details/domain/repositories/restaurant_details_repository.dart';
 import '../../features/restaurant_details/presentation/cubit/restaurant_details_cubit.dart';
 
 import '../../features/food_details/presentation/cubit/food_details_cubit.dart';
@@ -43,6 +45,9 @@ import '../../features/profile/data/repositories/profile_repository_impl.dart';
 import '../../features/profile/domain/repositories/profile_repository.dart';
 import '../../features/profile/presentation/cubit/profile_cubit.dart';
 
+import '../../features/favorites/data/datasources/favorites_remote_data_source.dart';
+import '../../features/favorites/data/repositories/favorites_repository_impl.dart';
+import '../../features/favorites/domain/repositories/favorites_repository.dart';
 import '../../features/favorites/presentation/cubit/favorites_cubit.dart';
 
 import '../../features/orders/data/datasources/order_remote_data_source.dart';
@@ -54,7 +59,7 @@ final getIt = GetIt.instance;
 
 Future<void> initGetIt() async {
   // Supabase
-  getIt.registerLazySingleton(() => Supabase.instance.client);
+  getIt.registerLazySingleton<SupabaseClient>(() => Supabase.instance.client);
 
   // Router
   getIt.registerSingleton<AppRouter>(AppRouter());
@@ -68,9 +73,9 @@ Future<void> initGetIt() async {
   _initAuth();
   _initHome();
   _initSearch();
+  _initFavorites(); // Initialize favorites before other details features
   _initFoodDetails();
   _initCart();
-  _initFavorites();
   _initProfile();
   _initRestaurantDetails();
   _initOrders();
@@ -111,7 +116,7 @@ void _initProfile() {
   getIt.registerLazySingleton<ProfileRepository>(
     () => ProfileRepositoryImpl(getIt(), getIt()),
   );
-  getIt.registerFactory(() => ProfileCubit(getIt()));
+  getIt.registerFactory<ProfileCubit>(() => ProfileCubit(getIt()));
 }
 
 void _initHome() {
@@ -155,18 +160,27 @@ void _initSearch() {
 }
 
 void _initFoodDetails() {
-  getIt.registerFactory<FoodDetailsCubit>(() => FoodDetailsCubit(getIt()));
+  getIt.registerFactory<FoodDetailsCubit>(
+      () => FoodDetailsCubit(getIt<CartRepository>(), getIt<FavoritesRepository>()));
 }
 
 void _initFavorites() {
-  getIt.registerFactory<FavoritesCubit>(() => FavoritesCubit());
+  getIt.registerLazySingleton<FavoritesRemoteDataSource>(
+    () => FavoritesRemoteDataSourceImpl(getIt<SupabaseClient>()),
+  );
+  getIt.registerLazySingleton<FavoritesRepository>(
+    () => FavoritesRepositoryImpl(getIt<FavoritesRemoteDataSource>(), getIt<SupabaseClient>()),
+  );
+  getIt.registerFactory<FavoritesCubit>(() => FavoritesCubit(getIt<FavoritesRepository>()));
 }
 
 void _initRestaurantDetails() {
   getIt.registerLazySingleton<RestaurantDetailsRemoteDataSource>(
-      () => RestaurantDetailsRemoteDataSourceImpl(getIt()));
+      () => RestaurantDetailsRemoteDataSourceImpl(getIt<SupabaseClient>()));
+  getIt.registerLazySingleton<RestaurantDetailsRepository>(
+      () => RestaurantDetailsRepositoryImpl(getIt<RestaurantDetailsRemoteDataSource>()));
   getIt.registerFactory<RestaurantDetailsCubit>(
-      () => RestaurantDetailsCubit(getIt()));
+      () => RestaurantDetailsCubit(getIt<RestaurantDetailsRepository>(), getIt<FavoritesRepository>()));
 }
 
 void _initOrders() {
@@ -176,6 +190,6 @@ void _initOrders() {
   getIt.registerLazySingleton<OrderRepository>(
     () => OrderRepositoryImpl(getIt(), getIt()),
   );
-  getIt.registerFactory(() => OrderCubit(getIt()));
+  getIt.registerFactory<OrderCubit>(() => OrderCubit(getIt()));
 }
 

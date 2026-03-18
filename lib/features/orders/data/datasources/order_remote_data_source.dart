@@ -38,7 +38,10 @@ class OrderRemoteDataSourceImpl implements OrderRemoteDataSource {
         .eq('user_id', userId)
         .order('created_at', ascending: false);
 
-    return (response as List).map((json) => OrderModel.fromJson(json)).toList();
+    return (response as List).map((json) {
+      print('Order JSON: $json');
+      return OrderModel.fromJson(json);
+    }).toList();
   }
 
   @override

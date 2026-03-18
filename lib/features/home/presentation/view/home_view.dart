@@ -71,10 +71,25 @@ class _HomeViewState extends State<HomeView> {
                             context: context,
                             isScrollControlled: true,
                             backgroundColor: Colors.transparent,
-                            builder: (_) => BlocProvider.value(
-                              value: context.read<HomeCubit>(),
-                              child: const HomeFilterBottomSheet(),
-                            ),
+                            builder: (_) {
+                              final homeState = context.read<HomeCubit>().state;
+                              String initialSortBy = "Popular";
+                              RangeValues initialPriceRange = const RangeValues(0, 100);
+                              if (homeState is HomeSuccess) {
+                                initialSortBy = homeState.sortBy ?? "Popular";
+                                initialPriceRange = homeState.priceRange ?? const RangeValues(0, 100);
+                              }
+                              return HomeFilterBottomSheet(
+                                initialSortBy: initialSortBy,
+                                initialPriceRange: initialPriceRange,
+                                onApply: (sortBy, priceRange) {
+                                  context.read<HomeCubit>().applyAdvancedFilters(
+                                        sortBy: sortBy,
+                                        priceRange: priceRange,
+                                      );
+                                },
+                              );
+                            },
                           );
                         },
                       ),

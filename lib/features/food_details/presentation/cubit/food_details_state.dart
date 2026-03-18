@@ -10,6 +10,7 @@ class FoodDetailsState extends Equatable {
   final bool isAddingToCart;
   final bool isAddedSuccessfully;
   final String? error;
+  final bool isFavorite;
 
   const FoodDetailsState({
     this.food,
@@ -20,6 +21,7 @@ class FoodDetailsState extends Equatable {
     this.isAddingToCart = false,
     this.isAddedSuccessfully = false,
     this.error,
+    this.isFavorite = false,
   });
 
   FoodDetailsState copyWith({
@@ -31,6 +33,7 @@ class FoodDetailsState extends Equatable {
     bool? isAddingToCart,
     bool? isAddedSuccessfully,
     String? error,
+    bool? isFavorite,
   }) {
     return FoodDetailsState(
       food: food ?? this.food,
@@ -40,7 +43,8 @@ class FoodDetailsState extends Equatable {
       totalPrice: totalPrice ?? this.totalPrice,
       isAddingToCart: isAddingToCart ?? this.isAddingToCart,
       isAddedSuccessfully: isAddedSuccessfully ?? this.isAddedSuccessfully,
-      error: error,
+      error: error ?? this.error,
+      isFavorite: isFavorite ?? this.isFavorite,
     );
   }
 
@@ -54,5 +58,6 @@ class FoodDetailsState extends Equatable {
         isAddingToCart,
         isAddedSuccessfully,
         error,
+        isFavorite,
       ];
 }

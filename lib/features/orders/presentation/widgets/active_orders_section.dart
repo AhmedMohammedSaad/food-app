@@ -7,6 +7,7 @@ import '../../../../core/router/routes.dart';
 import 'package:test_food_app/features/orders/data/models/order_model.dart';
 import '../cubit/order_cubit.dart';
 import '../cubit/order_state.dart';
+import 'orders_loading_skeleton.dart';
 
 class ActiveOrdersSection extends StatelessWidget {
   const ActiveOrdersSection({super.key});
@@ -16,7 +17,7 @@ class ActiveOrdersSection extends StatelessWidget {
     return BlocBuilder<OrderCubit, OrderState>(
       builder: (context, state) {
         if (state is OrdersLoading) {
-          return const Center(child: CircularProgressIndicator());
+          return const OrdersLoadingSkeleton();
         } else if (state is OrdersError) {
           return Center(child: Text(state.message));
         } else if (state is OrdersSuccess) {
@@ -25,7 +26,11 @@ class ActiveOrdersSection extends StatelessWidget {
               child: Column(
                 children: [
                   SizedBox(height: 100.h),
-                  Icon(Icons.receipt_long, size: 64.r, color: AppColors.slate300),
+                  Icon(
+                    Icons.receipt_long,
+                    size: 64.r,
+                    color: AppColors.slate300,
+                  ),
                   SizedBox(height: 16.h),
                   Text(
                     'No orders yet',
@@ -39,8 +44,6 @@ class ActiveOrdersSection extends StatelessWidget {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Your Orders', style: AppTextStyle.font18SemiBoldCharcoal),
-              SizedBox(height: 16.h),
               ListView.separated(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -69,11 +72,7 @@ class _OrderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.pushNamed(
-          context,
-          Routes.orderTracking,
-          arguments: order.id,
-        );
+        Navigator.pushNamed(context, Routes.orderTracking, arguments: order.id);
       },
       child: Container(
         padding: EdgeInsets.all(16.r),
@@ -128,7 +127,9 @@ class _OrderCard extends StatelessWidget {
                           vertical: 4.h,
                         ),
                         decoration: BoxDecoration(
-                          color: _getStatusColor(order.status).withValues(alpha: 0.1),
+                          color: _getStatusColor(
+                            order.status,
+                          ).withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8.r),
                         ),
                         child: Text(

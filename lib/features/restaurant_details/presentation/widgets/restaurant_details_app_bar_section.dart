@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../home/data/models/home_models.dart';
+import '../cubit/restaurant_details_cubit.dart';
 
 class RestaurantDetailsAppBarSection extends StatelessWidget {
   final RestaurantModel restaurant;
@@ -25,20 +27,22 @@ class RestaurantDetailsAppBarSection extends StatelessWidget {
         ),
       ),
       actions: [
-        CircleAvatar(
-          backgroundColor: AppColors.white,
-          child: IconButton(
-            icon: const Icon(Icons.share, color: AppColors.charcoal),
-            onPressed: () {},
-          ),
-        ),
-        SizedBox(width: 8.w),
-        CircleAvatar(
-          backgroundColor: AppColors.white,
-          child: IconButton(
-            icon: const Icon(Icons.favorite, color: AppColors.primary),
-            onPressed: () {},
-          ),
+        BlocBuilder<RestaurantDetailsCubit, RestaurantDetailsState>(
+          builder: (context, state) {
+            final bool isFavorite = state.isFavorite;
+            return CircleAvatar(
+              backgroundColor: AppColors.white,
+              child: IconButton(
+                icon: Icon(
+                  isFavorite ? Icons.favorite : Icons.favorite_border,
+                  color: AppColors.primary,
+                ),
+                onPressed: () => context
+                    .read<RestaurantDetailsCubit>()
+                    .toggleFavorite(restaurant.id),
+              ),
+            );
+          },
         ),
         SizedBox(width: 16.w),
       ],
